@@ -1,0 +1,34 @@
+
+services:
+  redis:
+    image: "bitnami/redis:latest"
+    platform: linux/amd64
+    ports:
+      - "6379:6379"  # Redis bağlantısı için port yönlendirmesi
+    volumes:
+      - ./data:/data  # Redis için veri saklama
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes  # Redis için boş şifreye izin verilir
+
+  db:
+    image: postgres  # PostgreSQL servisi için kullanılacak image
+    platform: linux/amd64
+    restart: always  # Servis yeniden başlatıldığında otomatik olarak yeniden başlat
+    environment:
+      POSTGRES_USER: postgres  # PostgreSQL kullanıcı adı
+      POSTGRES_PASSWORD: kafkasu  # PostgreSQL şifresi
+    ports:
+      - "5432:5432"  # PostgreSQL bağlantısı için port yönlendirmesi
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # Host sistemine erişim için ekstra host ayarı
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level=logical"  # PostgreSQL için logical replication ayarları
+
+  adminer:
+    image: adminer  # Adminer image'ı ile PostgreSQL veritabanına erişim
+    platform: linux/amd64
+    restart: always
+    ports:
+      - "8001:8080"  # Adminer için port yönlendirmesi
